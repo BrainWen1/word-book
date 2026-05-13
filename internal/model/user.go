@@ -3,10 +3,10 @@
 package model
 
 type User struct {
-	ID       int    `gorm:"primaryKey;autoIncrement" json:"id"`
-	Username string `gorm:"unique;not null" json:"username"`
-	Password string `gorm:"not null" json:"-"` // 不返回密码字段
-	Email    string `gorm:"unique;not null" json:"email"`
+	ID           int    `gorm:"primaryKey;autoIncrement" json:"id"`
+	Username     string `gorm:"type:varchar(100);unique;not null" json:"username"`
+	PasswordHash string `gorm:"type:varchar(255);not null" json:"password_hash"` // 存储密码哈希值，不存储明文密码
+	Email        string `gorm:"type:varchar(100)" json:"email"`
 
 	CreatedAt int64 `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt int64 `gorm:"autoUpdateTime" json:"updated_at"`
