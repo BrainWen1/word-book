@@ -23,7 +23,7 @@ var AppConfig Config
 func LoadConfig() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Println(".env file not found, falling back to system environment variables")
 	}
 
 	AppConfig = Config{

@@ -29,14 +29,20 @@ func (h *UserHandler) Register(c *gin.Context) {
 	// 解析请求体
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.FailResponse(c, "解析请求体失败")
+		utils.FailResponse(c, gin.H{
+			"message": "请求参数错误",
+			"error":   err.Error(),
+		})
 		return
 	}
 
 	// 调用 UserService 进行注册
 	user, err := h.UserService.Register(req.Username, req.Password, req.Email)
 	if err != nil {
-		utils.FailResponse(c, "注册失败")
+		utils.FailResponse(c, gin.H{
+			"message": "注册失败",
+			"error":   err.Error(),
+		})
 		return
 	}
 

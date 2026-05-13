@@ -37,11 +37,11 @@ func SuccessMessageResponse(c *gin.Context, message string) {
 	})
 }
 
-func FailResponse(c *gin.Context, message string) {
+func FailResponse(c *gin.Context, data interface{}) {
 	c.JSON(CodeFail, Response{
 		Code:    CodeFail,
-		Message: message,
-		Data:    nil,
+		Message: "fail",
+		Data:    data,
 	})
 }
 

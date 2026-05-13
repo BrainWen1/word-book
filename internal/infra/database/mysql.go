@@ -27,5 +27,8 @@ func ConnectDB() {
 
 // 自动迁移
 func MigrateDB() {
-	DB.AutoMigrate(&model.User{}, &model.Word{})
+	err := DB.AutoMigrate(&model.User{}, &model.Word{})
+	if err != nil {
+		log.Fatalf("Error migrating database: %v", err)
+	}
 }

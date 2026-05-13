@@ -8,6 +8,7 @@ import (
 	"word-book/internal/repo"
 
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 // UserService 负责用户相关的业务逻辑
@@ -23,7 +24,10 @@ func NewUserService(userRepo *repo.UserRepo) *UserService {
 func (s *UserService) Register(username, password, email string) (*model.User, error) {
 	// 查找是否已经存在该用户
 	exist, err := s.UserRepo.FindByUsername(username)
-	if err == nil && exist != nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errors.New("查询用户失败")
+	}
+	if exist != nil {
 		return nil, errors.New("用户名已被占用")
 	}
 

@@ -15,7 +15,7 @@ type Word struct {
 	ID     int `gorm:"primaryKey;autoIncrement" json:"id"`
 	UserID int `gorm:"not null" json:"user_id"` // 外键关联用户
 
-	Word           string       `gorm:"unique;not null" json:"word"`
+	Word           string       `gorm:"not null" json:"word"`                   // 不能设置为unique，因为一个单词可能是多个用户的生词
 	Mastery        MasteryLevel `gorm:"not null" json:"mastery"`                // 掌握程度
 	LastReviewedAt int64        `gorm:"autoUpdateTime" json:"last_reviewed_at"` // 上次复习时间
 	ReviewCount    int          `gorm:"default:0" json:"review_count"`          // 复习次数
