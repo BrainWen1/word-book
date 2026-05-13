@@ -1,0 +1,38 @@
+wordbook/
+├── cmd/
+│   └── server/
+│       └── main.go                # 入口，依赖注入，启动服务
+├── internal/
+│   ├── config/
+│   │   └── config.go              # 读环境变量或 config.yaml，提供 DB / Redis 地址等
+│   ├── model/
+│   │   ├── user.go
+│   │   └── word.go
+│   ├── repository/                # 数据访问层（直接操作 GORM）
+│   │   ├── user_repo.go           # 用户相关 DB 操作
+│   │   └── word_repo.go           # 生词相关 DB 操作
+│   ├── service/                   # 业务逻辑层
+│   │   ├── user_service.go        # 注册、登录（未来含 JWT 生成）
+│   │   ├── word_service.go        # 生词本业务逻辑
+│   │   └── dict_service.go        # 调用外部 API 查词（含缓存逻辑）
+│   ├── handler/                   # HTTP 处理器
+│   │   ├── user_handler.go
+│   │   ├── word_handler.go
+│   │   ├── dict_handler.go
+│   │   └── middleware/
+│   │       ├── auth.go            # 认证中间件（预留JWT）
+│   │       └── cors.go
+│   ├── router/
+│   │   └── router.go              # 路由注册
+│   └── infrastructure/
+│       ├── database/
+│       │   └── mysql.go           # GORM 初始化
+│       ├── cache/
+│       │   ├── cache.go           # Cache 接口定义
+│       │   └── nop_cache.go       # 空缓存实现（占位，后续换 redis_cache.go）
+│       └── external/
+│           └── dictionary_api.go  # HTTP 客户端调用外部词典 API
+├── api/
+│   └── docs/                      # 可选：API 文档（Swagger 注释）
+├── go.mod
+└── go.sum
