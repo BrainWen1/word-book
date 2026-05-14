@@ -3,12 +3,19 @@
 package router
 
 import (
+	"net/http"
 	"word-book/internal/handler"
 	"word-book/internal/handler/middleware"
 	"word-book/internal/infra/database"
 	"word-book/internal/repo"
 	"word-book/internal/service"
 	"word-book/internal/utils/response"
+	"word-book/internal/webapp"
+
+	_ "word-book/docs" // Swagger文档包
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +39,14 @@ func SetupRouter() *gin.Engine {
 	wordService := service.NewWordService(wordRepo)
 	wordHandler := handler.NewWordHandler(wordService)
 
-	// 公共路由
+	// 页面与公共路由
+	r.GET("/", func(c *gin.Context) {
+		c.Status(http.StatusOK)
+		c.Header("Content-Type", "text/html; charset=utf-8")
+		c.FileFromFS("index.html", http.FS(webapp.Files))
+	})
+	// Swagger 文档
+	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	api := r.Group("/api/v1") // http://localhost:8080/api/v1
 	{
 		// 健康检查接口

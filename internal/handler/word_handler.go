@@ -27,7 +27,17 @@ type AddWordRequest struct {
 	Example    string `json:"example,omitempty"`
 }
 
-// AddWord 添加一个新的生词
+// AddWord 加入生词本
+// @Summary 添加单词到生词本
+// @Description 需要登录
+// @Tags 生词本模块
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param word body AddWordRequest true "单词信息"
+// @Success 200 {object} response.Response "添加成功"
+// @Failure 401 {object} response.Response "未登录"
+// @Router /user/words [post]
 func (h *WordHandler) AddWord(c *gin.Context) {
 	// 解析请求体
 	var req AddWordRequest
@@ -47,7 +57,16 @@ func (h *WordHandler) AddWord(c *gin.Context) {
 	response.SuccessMsgAndDataResponse(c, "单词添加成功", newWord)
 }
 
-// ListWords 获取单词列表，支持分页和按掌握度筛选
+// ListWords 获取我的生词本
+// @Summary 获取生词列表
+// @Description 需要登录
+// @Tags 生词本模块
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.Response{data=[]model.Word}
+// @Failure 401 {object} response.Response "未登录"
+// @Router /user/words [get]
 func (h *WordHandler) ListWords(c *gin.Context) {
 	// 从查询参数获取分页和筛选信息
 	userID := c.GetInt("userID")
@@ -83,6 +102,19 @@ type UpdateMasteryRequest struct {
 	Mastery model.MasteryLevel `json:"mastery" binding:"required,oneof=0 1 2"`
 }
 
+// UpdateMastery 更新单词掌握度
+// @Summary 更新单词掌握度
+// @Description 需要登录
+// @Tags 生词本模块
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "单词ID"
+// @Param mastery body UpdateMasteryRequest true "新的掌握度"
+// @Success 200 {object} response.Response "更新成功"
+// @Failure 400 {object} response.Response "请求参数错误"
+// @Failure 401 {object} response.Response "未登录"
+// @Router /user/words/{id} [put]
 func (h *WordHandler) UpdateMastery(c *gin.Context) {
 	userID := c.GetInt("userID")
 	wordIDStr := c.Param("id")
@@ -109,6 +141,17 @@ func (h *WordHandler) UpdateMastery(c *gin.Context) {
 	})
 }
 
+// DeleteWord 删除单词
+// @Summary 删除生词（软删除）
+// @Description 需要登录
+// @Tags 生词本模块
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "单词ID"
+// @Success 200 {object} response.Response "删除成功"
+// @Failure 401 {object} response.Response "未登录"
+// @Router /user/words/{id} [delete]
 func (h *WordHandler) DeleteWord(c *gin.Context) {
 	userID := c.GetInt("userID")
 	wordIDStr := c.Param("id")

@@ -1,5 +1,24 @@
 package main
 
+// @title           单词本 API
+// @version         1.0
+// @description     基于 Go + Gin + MySQL + JWT 的在线单词本项目
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   你的名字
+// @contact.url    http://www.example.com
+// @contact.email  example@qq.com
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey  BearerAuth
+// @in                          header
+// @name                        Authorization
+
 import (
 	"log"
 	"word-book/internal/config"

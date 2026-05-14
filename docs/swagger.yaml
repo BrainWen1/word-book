@@ -1,0 +1,402 @@
+basePath: /api/v1
+definitions:
+  handler.AddWordRequest:
+    properties:
+      definition:
+        type: string
+      example:
+        type: string
+      phonetic:
+        type: string
+      word:
+        type: string
+    required:
+    - word
+    type: object
+  handler.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  handler.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  handler.UpdateMasteryRequest:
+    properties:
+      mastery:
+        allOf:
+        - $ref: '#/definitions/model.MasteryLevel'
+        enum:
+        - 0
+        - 1
+        - 2
+    required:
+    - mastery
+    type: object
+  model.MasteryLevel:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-comments:
+      Fuzzy: '1: 模糊'
+      Mastered: '2: 掌握'
+      Unknowned: '0: 未知'
+    x-enum-descriptions:
+    - '0: 未知'
+    - '1: 模糊'
+    - '2: 掌握'
+    x-enum-varnames:
+    - Unknowned
+    - Fuzzy
+    - Mastered
+  model.Word:
+    properties:
+      created_at:
+        type: string
+      definition:
+        description: 释义
+        type: string
+      example:
+        description: 例句
+        type: string
+      id:
+        type: integer
+      last_reviewed_at:
+        description: 上次复习时间
+        type: integer
+      mastery:
+        allOf:
+        - $ref: '#/definitions/model.MasteryLevel'
+        description: 掌握程度
+      phonetic:
+        description: 音标
+        type: string
+      review_count:
+        description: 复习次数
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        description: 外键关联用户
+        type: integer
+      word:
+        description: 不能设置为unique，因为一个单词可能是多个用户的生词
+        type: string
+    type: object
+  response.Response:
+    properties:
+      code:
+        description: 状态码
+        type: integer
+      data:
+        description: 数据
+      message:
+        description: 消息
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: example@qq.com
+    name: 你的名字
+    url: http://www.example.com
+  description: 基于 Go + Gin + MySQL + JWT 的在线单词本项目
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: 单词本 API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: 登录获取 JWT Token
+      parameters:
+      - description: 登录参数
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.Response'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 用户名或密码错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 用户登录
+      tags:
+      - 用户模块
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: 注册新用户
+      parameters:
+      - description: 注册参数
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 注册成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 用户注册
+      tags:
+      - 用户模块
+  /search:
+    get:
+      consumes:
+      - application/json
+      description: 根据单词查询释义、音标、例句
+      parameters:
+      - description: 要查询的单词
+        in: query
+        name: word
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    items:
+                      properties:
+                        meanings:
+                          items:
+                            properties:
+                              antonyms:
+                                description: 词义的反义词（可选）
+                                items:
+                                  type: string
+                                type: array
+                              definitions:
+                                items:
+                                  properties:
+                                    antonyms:
+                                      description: 反义词（可选）
+                                      items:
+                                        type: string
+                                      type: array
+                                    definition:
+                                      description: 定义文本
+                                      type: string
+                                    example:
+                                      description: 例句（可选）
+                                      type: string
+                                    synonyms:
+                                      description: 同义词（可选）
+                                      items:
+                                        type: string
+                                      type: array
+                                  type: object
+                                type: array
+                              partOfSpeech:
+                                description: 词性
+                                type: string
+                              synonyms:
+                                description: 词义的同义词（可选）
+                                items:
+                                  type: string
+                                type: array
+                            type: object
+                          type: array
+                        phonetics:
+                          items:
+                            properties:
+                              audio:
+                                description: 发音音频URL
+                                type: string
+                              sourceUrl:
+                                description: 来源URL
+                                type: string
+                              text:
+                                description: 音标文本
+                                type: string
+                            type: object
+                          type: array
+                        word:
+                          description: 单词
+                          type: string
+                      type: object
+                    type: array
+                  type: array
+              type: object
+        "404":
+          description: 单词不存在
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 查询单词
+      tags:
+      - 词典模块
+  /user/words:
+    get:
+      consumes:
+      - application/json
+      description: 需要登录
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.Word'
+                  type: array
+              type: object
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取生词列表
+      tags:
+      - 生词本模块
+    post:
+      consumes:
+      - application/json
+      description: 需要登录
+      parameters:
+      - description: 单词信息
+        in: body
+        name: word
+        required: true
+        schema:
+          $ref: '#/definitions/handler.AddWordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 添加成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 添加单词到生词本
+      tags:
+      - 生词本模块
+  /user/words/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 需要登录
+      parameters:
+      - description: 单词ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除生词（软删除）
+      tags:
+      - 生词本模块
+    put:
+      consumes:
+      - application/json
+      description: 需要登录
+      parameters:
+      - description: 单词ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 新的掌握度
+        in: body
+        name: mastery
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateMasteryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新单词掌握度
+      tags:
+      - 生词本模块
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

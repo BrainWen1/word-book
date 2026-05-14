@@ -25,6 +25,16 @@ type RegisterRequest struct {
 	Email    string `json:"email"`
 }
 
+// Register 用户注册
+// @Summary 用户注册
+// @Description 注册新用户
+// @Tags 用户模块
+// @Accept json
+// @Produce json
+// @Param register body RegisterRequest true "注册参数"
+// @Success 200 {object} response.Response "注册成功"
+// @Failure 400 {object} response.Response "参数错误"
+// @Router /register [post]
 func (h *UserHandler) Register(c *gin.Context) {
 	// 解析请求体
 	var req RegisterRequest
@@ -59,7 +69,17 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-// 用户登录的HTTP处理函数
+// Login 用户登录
+// @Summary 用户登录
+// @Description 登录获取 JWT Token
+// @Tags 用户模块
+// @Accept json
+// @Produce json
+// @Param login body LoginRequest true "登录参数"
+// @Success 200 {object} response.Response{data=response.Response} "登录成功"
+// @Failure 400 {object} response.Response "参数错误"
+// @Failure 401 {object} response.Response "用户名或密码错误"
+// @Router /login [post]
 func (h *UserHandler) Login(c *gin.Context) {
 	// 解析请求体
 	var req LoginRequest
