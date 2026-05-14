@@ -12,8 +12,9 @@ import (
 
 // Config 存储应用程序的配置信息
 type Config struct {
-	DB_dsn   string // 数据库源
-	Dict_api string // 词典API地址
+	DB_dsn       string // 数据库源
+	Dict_api     string // 词典API地址
+	JWTSecretKey []byte // JWT密钥
 }
 
 // AppConfig 全局配置变量
@@ -27,7 +28,8 @@ func LoadConfig() {
 	}
 
 	AppConfig = Config{
-		DB_dsn:   os.Getenv("DB_DSN"),
-		Dict_api: os.Getenv("DICT_API"),
+		DB_dsn:       os.Getenv("DB_DSN"),
+		Dict_api:     os.Getenv("DICT_API"),
+		JWTSecretKey: []byte(os.Getenv("JWT_SECRET_KEY")),
 	}
 }

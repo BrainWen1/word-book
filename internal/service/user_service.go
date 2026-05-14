@@ -6,6 +6,7 @@ import (
 	"errors"
 	"word-book/internal/model"
 	"word-book/internal/repo"
+	"word-book/internal/utils/jwt"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -51,4 +52,26 @@ func (s *UserService) Register(username, password, email string) (*model.User, e
 	}
 
 	return user, nil
+}
+
+// 用户登录的业务逻辑
+func (s *UserService) Login(username, password string) (string, error) {
+	// 查找用户
+	user, err := s.UserRepo.FindByUsername(username)
+	if err != nil {
+		return "", errors.New("用户不存在")
+	}
+
+	// 验证密码
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+		return "", errors.New("密码错误")
+	}
+
+	// 生成JWT令牌，并且返回用户信息和令牌
+	token, err := jwt.GenerateToken(user.ID, user.Username)
+	if err != nil {
+		return "", errors.New("令牌生成失败")
+	}
+
+	return token, nil
 }

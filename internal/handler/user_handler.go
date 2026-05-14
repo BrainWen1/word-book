@@ -46,8 +46,44 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
+	// 返回成功响应
 	response.SuccessResponse(c, gin.H{
 		"message": "注册成功",
 		"user_id": user.ID,
+	})
+}
+
+// LoginRequest 定义用户登录请求的结构体
+type LoginRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+// 用户登录的HTTP处理函数
+func (h *UserHandler) Login(c *gin.Context) {
+	// 解析请求体
+	var req LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.FailResponse(c, gin.H{
+			"message": "请求参数错误",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// 调用 UserService 进行登录验证
+	token, err := h.UserService.Login(req.Username, req.Password)
+	if err != nil {
+		response.FailResponse(c, gin.H{
+			"message": "登录失败",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// 返回成功响应
+	response.SuccessResponse(c, gin.H{
+		"message": "登录成功",
+		"token":   token,
 	})
 }
