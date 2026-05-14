@@ -1,6 +1,6 @@
 // internal/utils/response.go
 // 统一响应结构体和函数
-package utils
+package response
 
 import (
 	"github.com/gin-gonic/gin"

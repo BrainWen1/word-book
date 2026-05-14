@@ -8,7 +8,7 @@ import (
 	"word-book/internal/infra/database"
 	"word-book/internal/repo"
 	"word-book/internal/service"
-	"word-book/internal/utils"
+	"word-book/internal/utils/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,7 +30,7 @@ func SetupRouter() *gin.Engine {
 	{
 		// 健康检查接口
 		api.GET("/ping", func(c *gin.Context) {
-			utils.SuccessResponse(c, "pong")
+			response.SuccessResponse(c, "pong")
 		})
 		// 用户注册
 		api.POST("/register", userHandler.Register)
