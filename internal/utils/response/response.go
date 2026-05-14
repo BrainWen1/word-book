@@ -37,6 +37,22 @@ func SuccessMessageResponse(c *gin.Context, message string) {
 	})
 }
 
+func SuccessMsgAndDataResponse(c *gin.Context, message string, data interface{}) {
+	c.JSON(CodeSuccess, Response{
+		Code:    CodeSuccess,
+		Message: message,
+		Data:    data,
+	})
+}
+
+func FailMsgAndDataResponse(c *gin.Context, message string, data interface{}) {
+	c.JSON(CodeFail, Response{
+		Code:    CodeFail,
+		Message: message,
+		Data:    data,
+	})
+}
+
 func FailResponse(c *gin.Context, data interface{}) {
 	c.JSON(CodeFail, Response{
 		Code:    CodeFail,

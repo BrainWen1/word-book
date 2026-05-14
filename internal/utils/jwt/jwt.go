@@ -11,10 +11,11 @@ import (
 )
 
 // 配置项
-var (
-	JWTSecretKey        = config.AppConfig.JWTSecretKey
-	TokenExpireDuration = 24 * 7 * time.Hour // 默认7天过期
-)
+var TokenExpireDuration = 24 * 7 * time.Hour // 默认7天过期
+
+func jwtSecretKey() []byte {
+	return config.AppConfig.JWTSecretKey
+}
 
 type CustomClaims struct {
 	UserID   int    `json:"user_id"`
@@ -39,14 +40,14 @@ func GenerateToken(userID int, username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims) // 使用HS256算法签名
 
 	// 返回签名后的令牌字符串，使用全局配置的JWT密钥进行签名
-	return token.SignedString(JWTSecretKey)
+	return token.SignedString(jwtSecretKey())
 }
 
 // ParseToken 解析和验证JWT令牌
 func ParseToken(tokenString string) (*CustomClaims, error) {
 	// 解析令牌
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return JWTSecretKey, nil // 使用全局配置的JWT密钥进行验证
+		return jwtSecretKey(), nil // 使用配置中的JWT密钥进行验证
 	})
 	if err != nil {
 		return nil, err

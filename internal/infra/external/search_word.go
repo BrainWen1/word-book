@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"time"
 	"word-book/internal/config"
 )
 
@@ -32,8 +34,9 @@ type DictResponse []struct { // API返回的是一个切片，包含一个单词
 
 func SearchWord(word string) (DictResponse, error) {
 	// 拼接url
-	url := fmt.Sprintf("%s/%s", config.AppConfig.Dict_api, word)
-	resp, err := http.Get(url)
+	apiURL := fmt.Sprintf("%s/%s", config.AppConfig.Dict_api, url.PathEscape(word))
+	client := &http.Client{Timeout: 10 * time.Second} // 设置HTTP客户端的超时时间，避免请求挂起过久
+	resp, err := client.Get(apiURL)
 	if err != nil {
 		return nil, err
 	}

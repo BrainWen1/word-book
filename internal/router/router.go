@@ -28,6 +28,10 @@ func SetupRouter() *gin.Engine {
 	dictService := service.NewDictService()
 	dictHandler := handler.NewDictHandler(dictService)
 
+	wordRepo := repo.NewWordRepo(database.DB)
+	wordService := service.NewWordService(wordRepo)
+	wordHandler := handler.NewWordHandler(wordService)
+
 	// 公共路由
 	api := r.Group("/api/v1") // http://localhost:8080/api/v1
 	{
@@ -44,10 +48,11 @@ func SetupRouter() *gin.Engine {
 	}
 
 	// 受保护的路由
-	auth := api.Group("/")      // http://localhost:8080/api/v1/
+	auth := api.Group("/user")  // http://localhost:8080/api/v1/user
 	auth.Use(middleware.Auth()) // 认证中间件
 	{
-		auth.GET("/profile", func(c *gin.Context) {
+		// 健康检查接口（认证后）
+		auth.GET("/ping", func(c *gin.Context) {
 			userID := c.GetInt("userID")
 			username := c.GetString("username")
 			response.SuccessResponse(c, gin.H{
@@ -55,6 +60,14 @@ func SetupRouter() *gin.Engine {
 				"username": username,
 			})
 		})
+		// 获取单词列表
+		auth.GET("/words", wordHandler.ListWords)
+		// 添加单词
+		auth.POST("/words", wordHandler.AddWord)
+		// 更新掌握度
+		auth.PUT("/words/:id", wordHandler.UpdateMastery)
+		// 删除单词
+		auth.DELETE("/words/:id", wordHandler.DeleteWord)
 	}
 
 	return r
