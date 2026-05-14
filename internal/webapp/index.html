@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>单词本</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4efe7;
+      --bg-2: #fffaf2;
+      --panel: rgba(255, 255, 255, 0.84);
+      --panel-strong: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --brand: #0f766e;
+      --brand-2: #115e59;
+      --accent: #d97706;
+      --danger: #b91c1c;
+      --border: rgba(15, 23, 42, 0.12);
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.14), transparent 30%),
+        radial-gradient(circle at right 20%, rgba(217, 119, 6, 0.14), transparent 28%),
+        linear-gradient(180deg, var(--bg) 0%, #f8f4ec 100%);
+    }
+
+    .page {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1.5fr 1fr;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .hero-card, .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-card {
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.18), rgba(217, 119, 6, 0.12));
+      z-index: -1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.12);
+      color: var(--brand-2);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 60ch;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .metric {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+
+    .section {
+      padding: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-head h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    input, select, textarea, button {
+      font: inherit;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid rgba(15, 23, 42, 0.14);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(15, 118, 110, 0.55);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 15px;
+      cursor: pointer;
+      transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+      font-weight: 700;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: .56; cursor: not-allowed; transform: none; }
+
+    .primary { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; box-shadow: 0 12px 30px rgba(15, 118, 110, 0.26); }
+    .secondary { background: rgba(15, 23, 42, 0.06); color: var(--text); }
+    .ghost { background: transparent; color: var(--brand-2); border: 1px solid rgba(15, 118, 110, 0.18); }
+    .danger { background: rgba(185, 28, 28, 0.12); color: var(--danger); }
+
+    .status {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      color: var(--muted);
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .status.ok { color: var(--brand-2); border-color: rgba(15, 118, 110, 0.18); }
+    .status.error { color: var(--danger); border-color: rgba(185, 28, 28, 0.18); }
+
+    .token-box {
+      font-size: 12px;
+      color: var(--muted);
+      word-break: break-all;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.04);
+      border: 1px dashed rgba(15, 23, 42, 0.12);
+      margin-top: 12px;
+    }
+
+    .cards {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .word-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0 0 4px;
+    }
+
+    .phonetic {
+      margin: 0;
+      color: var(--brand-2);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meaning {
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(15, 118, 110, 0.04);
+      border: 1px solid rgba(15, 118, 110, 0.08);
+      margin-top: 10px;
+    }
+
+    .meaning h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .meaning p {
+      margin: 6px 0;
+      line-height: 1.6;
+    }
+
+    .divider {
+      margin: 18px 0;
+      border: 0;
+      border-top: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .word-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .word-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1.5fr .8fr auto;
+      align-items: center;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 16px;
+    }
+
+    .word-row .meta {
+      display: grid;
+      gap: 4px;
+    }
+
+    .word-row .meta strong {
+      font-size: 16px;
+    }
+
+    .word-row .meta span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .split { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.1);
+      color: var(--brand-2);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 980px) {
+      .hero, .grid-2 { grid-template-columns: 1fr; }
+      .row, .row-3, .hero-metrics, .word-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="eyebrow">Word Book MVP</div>
+        <h1>登录、查词、保存生词，一页打通</h1>
+        <p class="subtitle">这个页面优先保证功能可用和操作稳定：登录后自动保存 token，查词结果可以直接保存到生词本，右侧同步展示你的生词列表，并支持更新掌握度和删除。</p>
+        <div class="hero-metrics">
+          <div class="metric"><strong id="metric-login">未登录</strong><span>当前授权状态</span></div>
+          <div class="metric"><strong id="metric-words">0</strong><span>已保存生词</span></div>
+          <div class="metric"><strong id="metric-searches">0</strong><span>本次会话查词次数</span></div>
+        </div>
+      </div>
+      <div class="side-stack">
+        <div class="panel">
+          <h2>连接状态</h2>
+          <div id="appStatus" class="status">等待操作</div>
+          <div id="tokenBox" class="token-box" style="display:none;"></div>
+        </div>
+        <div class="panel">
+          <h2>快捷操作</h2>
+          <div class="actions">
+            <button class="secondary" id="btnRefreshWords" type="button">刷新生词列表</button>
+            <button class="ghost" id="btnLogout" type="button">退出登录</button>
+          </div>
+          <p class="footer-note">如果后端接口返回错误，这里会直接展示服务端消息，便于定位问题。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid-2">
+      <section class="panel section">
+        <div class="section-head">
+          <div>
+            <h3>登录 / 注册</h3>
+            <p>默认使用后端 JWT 登录，成功后自动带入后续请求。</p>
+          </div>
+          <span class="badge" id="authBadge">未授权</span>
+        </div>
+
+        <form id="loginForm">
+          <div class="row">
+            <label>用户名
+              <input id="loginUsername" autocomplete="username" required placeholder="请输入用户名">
+            </label>
+            <label>密码
+              <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="请输入密码">
+            </label>
+          </div>
+          <div class="actions">
+            <button class="primary" type="submit">登录</button>
+            <button class="secondary" id="btnRegister" type="button">注册并登录</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel section">
+        <div class="section-head">
+          <div>
+            <h3>查词</h3>
+            <p>查询后可直接把任意释义保存为生词。</p>
+          </div>
+          <span class="badge" id="searchBadge">待查询</span>
+        </div>
+
+        <form id="searchForm">
+          <label>单词
+            <input id="searchWord" required placeholder="例如: example">
+          </label>
+          <div class="actions">
+            <button class="primary" type="submit">查询</button>
+            <button class="secondary" id="btnClearSearch" type="button">清空结果</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <section class="panel section">
+        <div class="section-head">
+          <div>
+            <h3>查词结果</h3>
+            <p>每条释义都可以单独保存为生词。</p>
+          </div>
+          <span class="badge" id="searchCount">0 条结果</span>
+        </div>
+        <div id="searchResults" class="cards">
+          <div class="muted">暂无结果，请先查询单词。</div>
+        </div>
+      </section>
+
+      <section class="panel section">
+        <div class="section-head">
+          <div>
+            <h3>我的生词本</h3>
+            <p>支持筛选、分页、更新掌握度和删除。</p>
+          </div>
+          <span class="badge" id="wordTotal">0 条</span>
+        </div>
+
+        <div class="row-3" style="margin-bottom:12px;">
+          <label>掌握度筛选
+            <select id="masteryFilter">
+              <option value="">全部</option>
+              <option value="0">未知</option>
+              <option value="1">模糊</option>
+              <option value="2">掌握</option>
+            </select>
+          </label>
+          <label>每页数量
+            <select id="pageSize">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </label>
+          <label>当前页
+            <input id="currentPage" type="number" min="1" value="1">
+          </label>
+        </div>
+
+        <div id="wordList" class="word-list">
+          <div class="muted">尚未加载生词列表。</div>
+        </div>
+
+        <div class="pagination">
+          <div class="split">
+            <button class="secondary" id="btnPrevPage" type="button">上一页</button>
+            <button class="secondary" id="btnNextPage" type="button">下一页</button>
+          </div>
+          <div class="muted" id="pageInfo">第 1 页</div>
+        </div>
+      </section>
+    </div>
+
+    <p class="footer-note">提示：如果你从 Swagger 或 Postman 测过接口，这个页面会把 token 存到浏览器本地并自动附带到后续请求。后端仍然是当前这套 API，不需要额外部署前端服务。</p>
+  </div>
+
+  <script>
+    const API_BASE = '/api/v1';
+    const STORAGE_KEY = 'word-book.token';
+
+    const state = {
+      token: localStorage.getItem(STORAGE_KEY) || '',
+      searchCount: 0,
+      currentPage: 1,
+      pageSize: 10,
+      totalWords: 0,
+      searchResults: []
+    };
+
+    const els = {
+      appStatus: document.getElementById('appStatus'),
+      tokenBox: document.getElementById('tokenBox'),
+      metricLogin: document.getElementById('metric-login'),
+      metricWords: document.getElementById('metric-words'),
+      metricSearches: document.getElementById('metric-searches'),
+      authBadge: document.getElementById('authBadge'),
+      searchBadge: document.getElementById('searchBadge'),
+      searchCount: document.getElementById('searchCount'),
+      searchResults: document.getElementById('searchResults'),
+      wordList: document.getElementById('wordList'),
+      wordTotal: document.getElementById('wordTotal'),
+      pageInfo: document.getElementById('pageInfo'),
+      loginForm: document.getElementById('loginForm'),
+      searchForm: document.getElementById('searchForm'),
+      loginUsername: document.getElementById('loginUsername'),
+      loginPassword: document.getElementById('loginPassword'),
+      searchWord: document.getElementById('searchWord'),
+      masteryFilter: document.getElementById('masteryFilter'),
+      pageSize: document.getElementById('pageSize'),
+      currentPage: document.getElementById('currentPage'),
+      btnRegister: document.getElementById('btnRegister'),
+      btnLogout: document.getElementById('btnLogout'),
+      btnRefreshWords: document.getElementById('btnRefreshWords'),
+      btnClearSearch: document.getElementById('btnClearSearch'),
+      btnPrevPage: document.getElementById('btnPrevPage'),
+      btnNextPage: document.getElementById('btnNextPage')
+    };
+
+    function setStatus(message, kind = '') {
+      els.appStatus.className = kind ? `status ${kind}` : 'status';
+      els.appStatus.textContent = message;
+    }
+
+    function setAuthUI() {
+      const loggedIn = Boolean(state.token);
+      els.metricLogin.textContent = loggedIn ? '已登录' : '未登录';
+      els.authBadge.textContent = loggedIn ? '已授权' : '未授权';
+      els.tokenBox.style.display = loggedIn ? 'block' : 'none';
+      els.tokenBox.textContent = loggedIn ? `Token: ${state.token}` : '';
+    }
+
+    function saveToken(token) {
+      state.token = token;
+      localStorage.setItem(STORAGE_KEY, token);
+      setAuthUI();
+    }
+
+    function clearToken() {
+      state.token = '';
+      localStorage.removeItem(STORAGE_KEY);
+      setAuthUI();
+    }
+
+    function headers(extra = {}) {
+      const base = { 'Content-Type': 'application/json' };
+      if (state.token) base.Authorization = `Bearer ${state.token}`;
+      return { ...base, ...extra };
+    }
+
+    async function request(path, options = {}) {
+      const opts = {
+        method: options.method || 'GET',
+        headers: headers(options.headers || {}),
+        ...options
+      };
+
+      if (opts.body && typeof opts.body !== 'string' && !(opts.body instanceof FormData)) {
+        opts.body = JSON.stringify(opts.body);
+      }
+
+      const response = await fetch(`${API_BASE}${path}`, opts);
+      let payload = null;
+      const rawText = await response.text();
+
+      if (rawText) {
+        try {
+          payload = JSON.parse(rawText);
+        } catch (error) {
+          payload = rawText;
+        }
+      }
+
+      if (!response.ok || (payload && typeof payload === 'object' && payload.code && payload.code !== 200)) {
+        throw new Error(extractErrorMessage(payload) || `请求失败 (${response.status})`);
+      }
+
+      return payload;
+    }
+
+    function extractErrorMessage(payload) {
+      if (!payload) return '';
+      if (typeof payload === 'string') return payload;
+      if (typeof payload.data === 'string') return payload.data;
+      if (payload.data && typeof payload.data === 'object') {
+        if (typeof payload.data.error === 'string') return payload.data.error;
+        if (typeof payload.data.message === 'string') return payload.data.message;
+      }
+      if (typeof payload.message === 'string' && payload.message !== 'success' && payload.message !== 'fail') {
+        return payload.message;
+      }
+      return '';
+    }
+
+    function parseData(payload) {
+      if (payload && typeof payload === 'object' && 'data' in payload) return payload.data;
+      return payload;
+    }
+
+    function masteryLabel(value) {
+      if (value === 1 || value === '1') return '模糊';
+      if (value === 2 || value === '2') return '掌握';
+      return '未知';
+    }
+
+    function masteryBadgeClass(value) {
+      if (value === 2 || value === '2') return 'badge';
+      if (value === 1 || value === '1') return 'badge';
+      return 'badge';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function renderSearchResults(results) {
+      if (!Array.isArray(results) || results.length === 0) {
+        els.searchResults.innerHTML = '<div class="muted">暂无结果，请先查询单词。</div>';
+        els.searchCount.textContent = '0 条结果';
+        els.searchBadge.textContent = '待查询';
+        return;
+      }
+
+      els.searchBadge.textContent = `${results.length} 条结果`;
+      els.searchCount.textContent = `${results.length} 条结果`;
+
+      els.searchResults.innerHTML = results.map((entry, entryIndex) => {
+        const word = entry.word || 'unknown';
+        const phonetics = Array.isArray(entry.phonetics) ? entry.phonetics : [];
+        const meanings = Array.isArray(entry.meanings) ? entry.meanings : [];
+
+        const phoneticText = phonetics.find((item) => item && item.text)?.text || '无音标';
+        const meaningHtml = meanings.length ? meanings.map((meaning, meaningIndex) => {
+          const part = meaning.partOfSpeech || '未分类';
+          const definitions = Array.isArray(meaning.definitions) ? meaning.definitions : [];
+
+          const defHtml = definitions.length ? definitions.map((definition, definitionIndex) => {
+            const savePayload = {
+              word,
+              phonetic: phoneticText === '无音标' ? '' : phoneticText,
+              definition: definition.definition || '',
+              example: definition.example || ''
+            };
+
+            return `
+              <div class="meaning">
+                <h4>${escapeHtml(part)} · 释义 ${definitionIndex + 1}</h4>
+                <p><strong>释义：</strong>${escapeHtml(definition.definition || '暂无释义')}</p>
+                ${definition.example ? `<p><strong>例句：</strong>${escapeHtml(definition.example)}</p>` : ''}
+                <div class="actions">
+                  <button class="primary" type="button" data-save='${escapeHtml(JSON.stringify(savePayload))}'>保存到生词本</button>
+                </div>
+              </div>
+            `;
+          }).join('') : '<div class="meaning"><p class="muted">该词义下没有可展示的释义。</p></div>';
+
+          return `
+            <div class="meaning">
+              <h4>${escapeHtml(part)}</h4>
+              ${defHtml}
+            </div>
+          `;
+        }).join('') : '<div class="meaning"><p class="muted">没有可展示的词义。</p></div>';
+
+        return `
+          <article class="card" data-entry-index="${entryIndex}">
+            <div class="card-header">
+              <div>
+                <p class="word-title">${escapeHtml(word)}</p>
+                <p class="phonetic">${escapeHtml(phoneticText)}</p>
+              </div>
+              <span class="badge">${escapeHtml(phonetics.length ? '有音标' : '无音标')}</span>
+            </div>
+            ${meaningHtml}
+          </article>
+        `;
+      }).join('');
+
+      els.searchResults.querySelectorAll('[data-save]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          if (!state.token) {
+            setStatus('请先登录后再保存生词。', 'error');
+            return;
+          }
+
+          const payload = JSON.parse(button.getAttribute('data-save'));
+          try {
+            button.disabled = true;
+            const result = await request('/user/words', { method: 'POST', body: payload });
+            setStatus(`已保存生词：${payload.word}`, 'ok');
+            await loadWords();
+            return result;
+          } catch (error) {
+            setStatus(error.message || '保存失败', 'error');
+          } finally {
+            button.disabled = false;
+          }
+        });
+      });
+    }
+
+    function renderWords(data) {
+      const items = Array.isArray(data?.items) ? data.items : [];
+      state.totalWords = Number(data?.total || 0);
+      els.wordTotal.textContent = `${state.totalWords} 条`;
+      els.metricWords.textContent = String(state.totalWords);
+      els.pageInfo.textContent = `第 ${state.currentPage} 页 · 每页 ${state.pageSize} 条`;
+      els.currentPage.value = state.currentPage;
+
+      if (items.length === 0) {
+        els.wordList.innerHTML = '<div class="muted">当前筛选条件下没有生词。</div>';
+        return;
+      }
+
+      els.wordList.innerHTML = items.map((item) => {
+        return `
+          <div class="word-row">
+            <div class="meta">
+              <strong>${escapeHtml(item.word || '')}</strong>
+              <span>${escapeHtml(item.definition || '暂无释义')}</span>
+            </div>
+            <div class="meta">
+              <strong>${escapeHtml(masteryLabel(item.mastery))}</strong>
+              <span>音标：${escapeHtml(item.phonetic || '无')}</span>
+            </div>
+            <div class="split">
+              <select data-update-mastery="${escapeHtml(String(item.id))}">
+                <option value="0" ${String(item.mastery) === '0' ? 'selected' : ''}>未知</option>
+                <option value="1" ${String(item.mastery) === '1' ? 'selected' : ''}>模糊</option>
+                <option value="2" ${String(item.mastery) === '2' ? 'selected' : ''}>掌握</option>
+              </select>
+              <button class="secondary" type="button" data-delete-word="${escapeHtml(String(item.id))}">删除</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      els.wordList.querySelectorAll('[data-update-mastery]').forEach((select) => {
+        select.addEventListener('change', async () => {
+          const wordId = select.getAttribute('data-update-mastery');
+          try {
+            select.disabled = true;
+            await request(`/user/words/${wordId}`, {
+              method: 'PUT',
+              body: { mastery: Number(select.value) }
+            });
+            setStatus('掌握度已更新。', 'ok');
+            await loadWords();
+          } catch (error) {
+            setStatus(error.message || '更新失败', 'error');
+            select.value = select.dataset.previousValue || select.value;
+          } finally {
+            select.disabled = false;
+          }
+        });
+
+        select.dataset.previousValue = select.value;
+      });
+
+      els.wordList.querySelectorAll('[data-delete-word]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const wordId = button.getAttribute('data-delete-word');
+          if (!confirm('确定删除这个生词吗？')) return;
+
+          try {
+            button.disabled = true;
+            await request(`/user/words/${wordId}`, { method: 'DELETE' });
+            setStatus('生词已删除。', 'ok');
+            await loadWords();
+          } catch (error) {
+            setStatus(error.message || '删除失败', 'error');
+          } finally {
+            button.disabled = false;
+          }
+        });
+      });
+    }
+
+    async function login(username, password, endpoint) {
+      const payload = await request(endpoint, {
+        method: 'POST',
+        body: { username, password }
+      });
+
+      const data = parseData(payload) || {};
+      const token = data.token;
+
+      if (!token) {
+        throw new Error('登录成功但未返回 token');
+      }
+
+      saveToken(token);
+      setStatus(endpoint === '/login' ? '登录成功。' : '注册成功并已登录。', 'ok');
+    }
+
+    async function loadWords() {
+      if (!state.token) {
+        els.wordList.innerHTML = '<div class="muted">登录后可以查看和管理你的生词本。</div>';
+        els.wordTotal.textContent = '0 条';
+        els.metricWords.textContent = '0';
+        els.pageInfo.textContent = `第 ${state.currentPage} 页 · 每页 ${state.pageSize} 条`;
+        return;
+      }
+
+      const params = new URLSearchParams();
+      params.set('page', String(state.currentPage));
+      params.set('page_size', String(state.pageSize));
+      if (els.masteryFilter.value !== '') params.set('mastery', els.masteryFilter.value);
+
+      try {
+        const payload = await request(`/user/words?${params.toString()}`);
+        renderWords(parseData(payload) || {});
+      } catch (error) {
+        setStatus(error.message || '加载生词列表失败', 'error');
+      }
+    }
+
+    function syncPageInputs() {
+      state.pageSize = Number(els.pageSize.value) || 10;
+      state.currentPage = Math.max(1, Number(els.currentPage.value) || 1);
+    }
+
+    async function searchWord(word) {
+      const payload = await request(`/search?word=${encodeURIComponent(word)}`);
+      const data = parseData(payload);
+      state.searchCount += 1;
+      els.metricSearches.textContent = String(state.searchCount);
+      renderSearchResults(Array.isArray(data) ? data : []);
+      setStatus(`已查询单词：${word}`, 'ok');
+    }
+
+    els.loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        await login(els.loginUsername.value.trim(), els.loginPassword.value, '/login');
+        await loadWords();
+      } catch (error) {
+        setStatus(error.message || '登录失败', 'error');
+      }
+    });
+
+    els.btnRegister.addEventListener('click', async () => {
+      try {
+        const username = els.loginUsername.value.trim();
+        const password = els.loginPassword.value;
+        await request('/register', {
+          method: 'POST',
+          body: { username, password }
+        });
+        await login(username, password, '/login');
+        await loadWords();
+      } catch (error) {
+        setStatus(error.message || '注册失败', 'error');
+      }
+    });
+
+    els.searchForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const word = els.searchWord.value.trim();
+      if (!word) {
+        setStatus('请输入要查询的单词。', 'error');
+        return;
+      }
+
+      try {
+        await searchWord(word);
+      } catch (error) {
+        setStatus(error.message || '查询失败', 'error');
+      }
+    });
+
+    els.btnLogout.addEventListener('click', async () => {
+      clearToken();
+      setStatus('已退出登录。', 'ok');
+      await loadWords();
+    });
+
+    els.btnRefreshWords.addEventListener('click', async () => {
+      syncPageInputs();
+      await loadWords();
+    });
+
+    els.btnClearSearch.addEventListener('click', () => {
+      els.searchResults.innerHTML = '<div class="muted">暂无结果，请先查询单词。</div>';
+      els.searchBadge.textContent = '待查询';
+      els.searchCount.textContent = '0 条结果';
+      els.searchWord.value = '';
+    });
+
+    els.masteryFilter.addEventListener('change', async () => {
+      state.currentPage = 1;
+      els.currentPage.value = '1';
+      await loadWords();
+    });
+
+    els.pageSize.addEventListener('change', async () => {
+      syncPageInputs();
+      state.currentPage = 1;
+      els.currentPage.value = '1';
+      await loadWords();
+    });
+
+    els.currentPage.addEventListener('change', async () => {
+      syncPageInputs();
+      await loadWords();
+    });
+
+    els.btnPrevPage.addEventListener('click', async () => {
+      if (state.currentPage <= 1) return;
+      state.currentPage -= 1;
+      els.currentPage.value = String(state.currentPage);
+      await loadWords();
+    });
+
+    els.btnNextPage.addEventListener('click', async () => {
+      const maxPage = Math.max(1, Math.ceil(state.totalWords / state.pageSize));
+      if (state.currentPage >= maxPage) return;
+      state.currentPage += 1;
+      els.currentPage.value = String(state.currentPage);
+      await loadWords();
+    });
+
+    setAuthUI();
+    renderSearchResults([]);
+    loadWords();
+  </script>
+</body>
+</html>

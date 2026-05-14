@@ -41,9 +41,7 @@ func SetupRouter() *gin.Engine {
 
 	// 页面与公共路由
 	r.GET("/", func(c *gin.Context) {
-		c.Status(http.StatusOK)
-		c.Header("Content-Type", "text/html; charset=utf-8")
-		c.FileFromFS("index.html", http.FS(webapp.Files))
+		c.Data(http.StatusOK, "text/html; charset=utf-8", webapp.IndexHTML)
 	})
 	// Swagger 文档
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
