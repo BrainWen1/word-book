@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"word-book/internal/handler"
 	"word-book/internal/handler/middleware"
+	"word-book/internal/infra/cache"
 	"word-book/internal/infra/database"
 	"word-book/internal/repo"
 	"word-book/internal/service"
@@ -20,7 +21,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter() *gin.Engine {
+func SetupRouter(cache cache.Cache) *gin.Engine {
 	// 创建默认的Gin引擎
 	r := gin.Default()
 
@@ -32,7 +33,7 @@ func SetupRouter() *gin.Engine {
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
 
-	dictService := service.NewDictService()
+	dictService := service.NewDictService(cache)
 	dictHandler := handler.NewDictHandler(dictService)
 
 	wordRepo := repo.NewWordRepo(database.DB)
