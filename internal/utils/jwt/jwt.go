@@ -4,6 +4,7 @@ package jwt
 
 import (
 	"errors"
+	"log"
 	"time"
 	"word-book/internal/config"
 
@@ -14,7 +15,11 @@ import (
 var TokenExpireDuration = 24 * 7 * time.Hour // 默认7天过期
 
 func jwtSecretKey() []byte {
-	return config.AppConfig.JWTSecretKey
+	key := config.AppConfig.JWTSecretKey
+	if len(key) == 0 {
+		log.Fatal("JWT secret key is not set in config")
+	}
+	return key
 }
 
 type CustomClaims struct {
