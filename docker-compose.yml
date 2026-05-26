@@ -1,0 +1,47 @@
+# 服务列表
+services:
+  # 应用服务
+  app:
+    build: .  # 自动读取当前目录Dockerfile，构建项目镜像
+    container_name: wordbook-app
+    restart: always
+    ports:
+      - "8080:8080"
+    # 依赖：先启动mysql和redis，再启动app
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - GIN_MODE=release # 设置Gin框架为release模式，优化性能
+
+  # mysql
+  mysql:
+    image: mysql:8.0-oracle
+    container_name: wordbook-mysql
+    restart: always
+    
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: word_book
+    
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  # redis
+  redis:
+    image: redis:7-alpine
+    container_name: wordbook-redis
+    restart: always
+    
+    ports:
+      - "6379:6379"
+    
+    volumes:
+      - redis-data:/data
+
+# 数据卷
+volumes:
+  mysql-data:
+  redis-data:
