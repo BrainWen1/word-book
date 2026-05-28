@@ -9,8 +9,10 @@ services:
       - "8080:8080"
     # 依赖：先启动mysql和redis，再启动app
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       - GIN_MODE=release # 设置Gin框架为release模式，优化性能
 
@@ -23,11 +25,16 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: word_book
     
     volumes:
       - mysql-data:/var/lib/mysql
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # redis
   redis:
@@ -40,6 +47,12 @@ services:
     
     volumes:
       - redis-data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 # 数据卷
 volumes:
