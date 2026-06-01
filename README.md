@@ -17,3 +17,9 @@
 | 账号 | 注册、登录、登出，使用 JWT 鉴权 |
 | 查词 | 输入单词查询多种释义，支持 Redis 缓存 |
 | 生词本 | 添加、删除生词，查看生词列表，更新熟练度 |
+
+## 四、Docker compose 一键部署
+
+```bash
+docker compose up -d --build
+```
